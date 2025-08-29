@@ -3,7 +3,6 @@ package com.aman.bfhjavaqualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -12,23 +11,14 @@ import java.util.Map;
 @SpringBootApplication
 public class BfhJavaQualifierApplication implements CommandLineRunner {
 
-    private final RestTemplate restTemplate;
-
-    public BfhJavaQualifierApplication(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
-
     public static void main(String[] args) {
         SpringApplication.run(BfhJavaQualifierApplication.class, args);
     }
 
-    @Bean
-    RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-
     @Override
     public void run(String... args) {
+        RestTemplate restTemplate = new RestTemplate();
+
         try {
             String generateUrl = "https://bfhldevapigw.healthrx.co.in/hiring/generateWebhook/JAVA";
 
@@ -38,9 +28,8 @@ public class BfhJavaQualifierApplication implements CommandLineRunner {
                     "email", "kumaraman181003@gmail.com"
             );
 
-            ResponseEntity<GenerateResponse> genResp = restTemplate.postForEntity(
-                    generateUrl, genBody, GenerateResponse.class
-            );
+            ResponseEntity<GenerateResponse> genResp =
+                    restTemplate.postForEntity(generateUrl, genBody, GenerateResponse.class);
 
             if (!genResp.getStatusCode().is2xxSuccessful() || genResp.getBody() == null) {
                 System.out.println("Failed to generate webhook/token. HTTP: " + genResp.getStatusCode());
@@ -74,10 +63,12 @@ public class BfhJavaQualifierApplication implements CommandLineRunner {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("Authorization", accessToken);
 
-            Map<String, String> submitBody = Map.of("finalQuery", finalQuery);
-            HttpEntity<Map<String, String>> request = new HttpEntity<>(submitBody, headers);
+            HttpEntity<Map<String, String>> request =
+                    new HttpEntity<>(Map.of("finalQuery", finalQuery), headers);
 
-            ResponseEntity<String> submitResp = restTemplate.postForEntity(submitUrl, request, String.class);
+            ResponseEntity<String> submitResp =
+                    restTemplate.postForEntity(submitUrl, request, String.class);
+
             System.out.println("Submission HTTP: " + submitResp.getStatusCode());
             System.out.println("Submission Body: " + submitResp.getBody());
 
